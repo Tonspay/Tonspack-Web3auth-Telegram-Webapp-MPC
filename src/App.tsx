@@ -79,11 +79,20 @@ function App() {
       console.log("🔥web3authSfa init")
       const { payload } = decodeToken(idToken);
       console.log(payload)
-      await web3authSfa.connect({
-        verifier,
-        verifierId: (payload as any).sub,
-        idToken: idToken!,
-      });
+
+      console.log(web3authSfa.status,web3authSfa.status == "connected")
+
+      if(web3authSfa.status == "connected")
+      {
+
+      }else{
+        await web3authSfa.connect({
+          verifier,
+          verifierId: (payload as any).sub,
+          idToken: idToken!,
+        });
+      }
+
       setIsLoggingIn(false);
       setLoggedIn(true);
     } catch (err) {
@@ -121,6 +130,17 @@ function App() {
     const rpc = new RPC(web3authSfa.provider);
     const userAccount = await rpc.getAccounts();
     uiConsole(userAccount);
+  };
+
+  const getKeypair = async () => {
+    if (!web3authSfa.provider) {
+      uiConsole("No provider found");
+      return;
+    }
+    const privateKey = await web3authSfa.provider.request({
+      method: "eth_private_key"
+    });
+    uiConsole(privateKey);
   };
 
   const getBalance = async () => {
@@ -238,6 +258,11 @@ function App() {
         <div>
           <button onClick={sendTransaction} className="card">
             Send Transaction
+          </button>
+        </div>
+        <div>
+          <button onClick={getKeypair} className="card">
+            Get keypair
           </button>
         </div>
         <div>
